@@ -13,11 +13,9 @@ const commentSchema = new Schema(
     },
     upVotes: {
         type: Number,
-        required: true
     },
     downVotes: {
         type: Number,
-        required: true
     },
     bill: {
       type: Schema.Types.ObjectId, ref: "Bill"
