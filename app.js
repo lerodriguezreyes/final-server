@@ -6,10 +6,8 @@ var cors = require('cors');
 var mongoose = require('mongoose')
 
 // require routes
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth') 
-var usersRouter = require('./routes/users')
 var commentsRouter = require('./routes/comments')
 
 var app = express();
@@ -20,6 +18,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.set('trust proxy', 1);
+app.enable('trust proxy');
+
 // cors middleware before the routes
 app.use(
     cors({
@@ -28,7 +29,6 @@ app.use(
   );
 
 // routes configuration
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/comments', commentsRouter)
