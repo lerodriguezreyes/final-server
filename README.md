@@ -6,4 +6,4 @@
 3. Have 3 database models or more:
    - ✔️ Completed User model on 3/24/24, status: fully functional.
    - ✔️ Completed Comment model on 3/24/24, status: fully functional.
-   - ⏰ Pending Bill model, status: conceptualization phase.
+   - ⏰ Pending Bill model, status: drafted an early model.
