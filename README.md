@@ -7,3 +7,9 @@
    - ✔️ Completed User model on 3/24/24, status: fully functional.
    - ✔️ Completed Comment model on 3/24/24, status: fully functional.
    - ⏰ Pending Bill model, status: drafted an early model.
+
+PENDING TASKS:
+- develop the search functionality for bills
+- test the Bill model
+- develop the Bill routes
+- protect the comments by owner
