@@ -11,10 +11,15 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    userName: {
+    name: {
       type: String,
+      unique: true,
       required: true,
     },
+    profilePicURL: { 
+      type: String, 
+      default: "https://cvhrma.org/wp-content/uploads/2015/07/default-profile-photo.jpg",
+    }
   },
   { 
     timestamps: true

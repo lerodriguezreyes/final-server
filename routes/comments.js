@@ -2,10 +2,13 @@ var express = require("express");
 var router = express.Router();
 
 const Comment = require("../models/Comment");
+const isAuthenticated = require("../middleware/isAuthenticated");
+const isCommentOwner = require('../middleware/isCommentOwner');
 
 // retrieve all comments
 router.get("/", (req, res, next) => {
   Comment.find()
+    .populate('owner')
     .then((foundComment) => {
       console.log("Retrieved all comments ====>", foundComment);
       res.json(foundComment);
@@ -17,10 +20,11 @@ router.get("/", (req, res, next) => {
 });
 
 /* new comment */
-router.post("/new", function (req, res, next) {
-  const { userName, comment, upVotes, downVotes } = req.body;
+router.post("/new", isAuthenticated, (req, res, next) => {
+  const { comment, upVotes, downVotes} = req.body;
+  
 
-  Comment.create({ userName, comment, upVotes, downVotes })
+  Comment.create({ comment, upVotes, downVotes, owner:req.user._id })
     .then((createdComment) => {
       console.log("Created a new comment ====>", createdComment);
       res.json(createdComment);
@@ -33,7 +37,7 @@ router.post("/new", function (req, res, next) {
 });
 
 // update commment by id
-router.post("/update/:commentId", (req, res, next) => {
+router.post("/update/:commentId", isAuthenticated, isCommentOwner, (req, res, next) => {
   Comment.findByIdAndUpdate(req.params.commentId, req.body, {
     new: true,
   })
@@ -49,7 +53,7 @@ router.post("/update/:commentId", (req, res, next) => {
 
 // delete comment by id
 
-router.get("/delete/:commentId", (req, res, next) => {
+router.delete("/delete/:commentId", isAuthenticated, isCommentOwner, (req, res, next) => {
   Comment.findByIdAndDelete(req.params.commentId)
     .then((deletedComment) => {
       console.log("Deleted ===>", deletedComment);
