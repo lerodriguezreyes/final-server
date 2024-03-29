@@ -12,5 +12,5 @@
    - ✔️ Bill create route with full integration of 3 api's completed with substantial help from Dustin.
 
 PENDING TASKS:
-- ⏰ Push comments to Bills, update bills.
+- ⏰ Push comments to Bills, update bills after comments.
 - ⏰ Protect bill delete route;
