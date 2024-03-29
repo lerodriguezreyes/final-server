@@ -1,33 +1,33 @@
 const { model, Schema } = require("mongoose");
 
-const userSchema = new Schema(
+const billSchema = new Schema(
   {
-    congress: {
-      type: Number,
+    title: {
+      type: String,
       required: true,
     },
-    billNumber: {
-      type: String,
+    congress: {
+      type: Number,
       required: true,
     },
     billType: {
       type: String,
       required: true,
     },
-    billTitle: {
+    billNumber: {
       type: String,
       required: true,
     },
-    billSponsors: {
+    sponsors: {
       type: [String],
     },
-    billCosponsors: {
+    cosponsors: {
       type: Number,
     },
     originChamber: {
       type: String,
     },
-    billIntroducedDate: {
+    introducedDate: {
       type: Date,
     },
     latestActionDate: {
@@ -58,4 +58,4 @@ const userSchema = new Schema(
   }
 );
 
-module.exports = model("User", userSchema);
+module.exports = model("Bill", billSchema);

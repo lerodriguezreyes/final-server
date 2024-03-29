@@ -7,8 +7,9 @@ var mongoose = require('mongoose')
 
 // require routes
 var usersRouter = require('./routes/users');
-var authRouter = require('./routes/auth') 
-var commentsRouter = require('./routes/comments')
+var authRouter = require('./routes/auth'); 
+var commentsRouter = require('./routes/comments');
+var billsRouter = require('./routes/bills');
 
 var app = express();
 
@@ -31,7 +32,8 @@ app.use(
 // routes configuration
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
-app.use('/comments', commentsRouter)
+app.use('/comments', commentsRouter);
+app.use("/bills", billsRouter);
 
 //mongoose configuration
 mongoose
