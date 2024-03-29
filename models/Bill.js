@@ -37,13 +37,7 @@ const billSchema = new Schema(
       type: String,
     },
     summary: {
-      type: String,
-    },
-    initialTextDate: {
-      type: Date,
-    },
-    initialTextPdfLink: {
-      type: String,
+      type: Object,
     },
     latestTextDate: {
       type: Date,

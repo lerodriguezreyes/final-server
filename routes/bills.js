@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var axios = require("axios");
 const Bill = require("../models/Bill");
 
 // retrieve all bills
@@ -15,57 +16,72 @@ router.get("/", (req, res, next) => {
     });
 });
 
-module.exports = router;
+router.post("/new", async (req, res, next) => {
+  try {
+    const { title, congress, billType, billNumber } = req.body;
 
-router.post("/new", (req, res, next) => {
-  const { title, congress, billType, billNumber } = req.body;
-
-  // Check if the values provided are empty.
-  if (!title || !congress || !billType || !billNumber) {
-    res
-      .status(400)
-      .json({
+    // Check if the values provided are empty.
+    if (!title || !congress || !billType || !billNumber) {
+      res.status(400).json({
         message:
           "The following variables are required to proceed: title, congress, billType, billNumber.",
       });
-    return;
-  }
-  Bill.findOne({ title })
-    .then((foundBill) => {
-      // If the bill  already exists, send the existing bill record.
-      if (foundBill) {
-        res.status(200).json({ foundBill });
-        return;
-      }
+      return;
+    }
 
-      // If title is unique, proceed to create new bill record
-      Bill.create({ title, congress, billType, billNumber })
-        .then((createdBill) => {
-          // Send response containing the bill record.
-          res.status(201).json({ createdBill });
-        })
-        .catch((err) => {
-          if (err instanceof mongoose.Error.ValidationError) {
-            console.log("This is the error", err);
-            res.status(501).json({ message: "Provide all fields", err });
-          } else if (err.code === 11000) {
-            console.log("Duplicate value", err);
-            res
-              .status(502)
-              .json({
-                message: "Invalid title, congress, billType, billNumber.",
-                err,
-              });
-          } else {
-            console.log("Error =>", err);
-            res.status(503).json({ message: "Error encountered", err });
-          }
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: "Internal Server Error" });
-    });
+    let foundBill = await Bill.findOne({ title });
+
+    if (!foundBill) {
+      let details = await axios.get(
+        `https://api.congress.gov/v3/bill/${congress}/${billType}/${billNumber}?api_key=${process.env.CONGRESS_API_KEY}`
+      );
+
+      // console.log("These are the details", details.data)
+
+      let summaries = await axios.get(
+        `https://api.congress.gov/v3/bill/${congress}/${billType}/${billNumber}/summaries?api_key=${process.env.CONGRESS_API_KEY}`
+      );
+
+      console.log("these are the summaries", summaries.data);
+
+      let text = await axios.get(
+        `https://api.congress.gov/v3/bill/${congress}/${billType}/${billNumber}/text?api_key=${process.env.CONGRESS_API_KEY}`
+      );
+
+      let finalIndex;
+
+      let newBill = await Bill.create({
+        title,
+        congress,
+        billType,
+        billNumber,
+        sponsors: details.data.bill.sponsors.map((sponsor) => sponsor.fullName),
+        cosponsors: details.data.bill.cosponsors?.count || 0,
+        originChamber: details.data.bill.originChamber,
+        introducedDate: details.data.bill.introducedDate,
+        latestActionDate: details.data.bill.latestAction.actionDate,
+        latestActionText: details.data.bill.latestAction.text,
+        summary: summaries.data.summaries[0] || null,
+        latestTextDate:
+          text.data.textVersions.filter((el, i, arr) => {
+            finalIndex = arr.length - 1;
+            return i == finalIndex;
+          })[0]?.date || "",
+        latestTextPdfLink:
+          text.data.textVersions.filter((el, i, arr) => {
+            finalIndex = arr.length - 1;
+            return i == finalIndex;
+          })[0]?.formats[1].url || "",
+      });
+
+      res.status(201).json({ bill: newBill });
+    } else {
+      res.status(200).json({ bill: foundBill });
+    }
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
 });
 
 router.post("/update/:billId", (req, res, next) => {
@@ -79,11 +95,9 @@ router.post("/update/:billId", (req, res, next) => {
   Bill.findOne({ title }).then((foundBill) => {
     // If the bill  already exists, update the existing bill record.
     if (!foundBill) {
-      res
-        .status(400)
-        .json({
-          message: "The bill does not exist. Please create the record first.",
-        });
+      res.status(400).json({
+        message: "The bill does not exist. Please create the record first.",
+      });
       return;
     }
     Bill.findByIdAndUpdate(req.params.billId, req.body, {
@@ -100,16 +114,16 @@ router.post("/update/:billId", (req, res, next) => {
   });
 });
 
-router.get("/delete/:billId", (req, res, next) =>{
+router.get("/delete/:billId", (req, res, next) => {
   Bill.findByIdAndDelete(req.params.billId)
-  .then((deletedBill) => {
-    console.log("Deleted ===>", deletedBill);
-    res.json(deletedBill);
-  })
-  .catch((err) => {
-    console.log("Error deleting bill ====>", err);
-    res.status(502).json(err);
-  });
+    .then((deletedBill) => {
+      console.log("Deleted ===>", deletedBill);
+      res.json(deletedBill);
+    })
+    .catch((err) => {
+      console.log("Error deleting bill ====>", err);
+      res.status(502).json(err);
+    });
 });
 
 module.exports = router;

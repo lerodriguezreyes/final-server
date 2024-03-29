@@ -7,9 +7,10 @@
    - ✔️ Completed User model on 3/24/24, status: fully functional.
    - ✔️ Completed Comment model on 3/24/24, status: fully functional. 
       - ✔️ protected comments with isOwner middleware to prevent CRUD operations if not author of said comment 3/26/24 
-   - ⏰ Pending Bill model, status: drafted an early model.
+   - ✔️  Bill model, status: completed on 3/29/24 
+   - ✔️  Bill routes completed 3/29/24, protects against duplicates.
+   - ✔️ Bill create route with full integration of 3 api's completed with substantial help from Dustin.
 
 PENDING TASKS:
-- develop the search functionality routes for bills
-- test the Bill model
-- develop the Bill routes
+- ⏰ Push comments to Bills, update bills.
+- ⏰ Protect bill delete route;
