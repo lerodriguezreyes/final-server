@@ -22,7 +22,7 @@ router.get("/", (req, res, next) => {
 
 /* new comment */
 router.post("/new", isAuthenticated, (req, res, next) => {
-  const { comment, upVotes, downVotes, billId } = req.body;
+  const { comment, upVotes, downVotes, bill: billId } = req.body;
 
   Comment.create({ comment, owner: req.user._id, bill: billId })
     .then((createdComment) => {
@@ -69,6 +69,11 @@ router.delete(
   isAuthenticated,
   isCommentOwner,
   (req, res, next) => {
+    Bill.updateOne(
+      req.params.commentId,
+      { $pull: { comments: req.params.commentId } },
+      { new: true }
+    );
     Comment.findByIdAndDelete(req.params.commentId)
       .then((deletedComment) => {
         console.log("Deleted ===>", deletedComment);
