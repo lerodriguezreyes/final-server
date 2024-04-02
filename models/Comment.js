@@ -12,8 +12,9 @@ const commentSchema = new Schema(
     downVotes: {
       type: Number,
     },
-    // bill: { type: Schema.Types.ObjectId, ref: "Bill" },
+    bill: { type: Schema.Types.ObjectId, ref: "Bill" },
     owner: { type: Schema.Types.ObjectId, ref: "User" },
+    replies: [{ type: Schema.Types.ObjectId, ref: "Reply"}]
   },
   {
     timestamps: true,
