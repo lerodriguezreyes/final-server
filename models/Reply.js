@@ -12,7 +12,7 @@ const replySchema = new Schema(
     downVotes: {
       type: Number,
     },
-    author: { type: Schema.Types.ObjectId, ref: "User" },
+    owner: { type: Schema.Types.ObjectId, ref: "User" },
     comment: { type: Schema.Types.ObjectId, ref: "Comment"}
   },
   {
