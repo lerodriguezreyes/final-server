@@ -34,11 +34,11 @@ router.get('/conversation/:billId', (req, res, next) => {
   Bill.findById(req.params.billId)
     .populate({path: 'comments', 
       populate: { path: 'owner'},
-      populate: { path: 'replies'},
-      populate: { path: 'author'}
+      // populate: { path: 'replies'},
+      // populate: { path: 'owner'}
     })
     .then((populated) => {
-      console.log("Retrieved sepecified bill by ID ====>", foundBill);
+      console.log("Retrieved sepecified bill by ID ====>",populated);
       res.json(populated)
     })
     .catch((err) => {
