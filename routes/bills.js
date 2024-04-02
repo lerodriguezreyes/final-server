@@ -16,6 +16,18 @@ router.get("/", (req, res, next) => {
     });
 });
 
+router.get("/details/:billId", (req, res, next) => {
+  Bill.findOne()
+    .then((foundBill) => {
+      console.log("Retrieved sepecified bill by ID ====>", foundBill);
+      res.json(foundBill);
+    })
+    .catch((err) => {
+      console.log("Error retrieving specified bill", err);
+      res.json({ errorMessage: "Error retrieving specified bill", err });
+    });
+});
+
 router.post("/new", async (req, res, next) => {
   try {
     const { title, congress, billType, billNumber } = req.body;
