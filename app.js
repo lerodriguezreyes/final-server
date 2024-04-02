@@ -10,6 +10,8 @@ var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth'); 
 var commentsRouter = require('./routes/comments');
 var billsRouter = require('./routes/bills');
+var photosRouter = require("../server/routes/photos")
+
 
 var app = express();
 
@@ -34,6 +36,7 @@ app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/comments', commentsRouter);
 app.use("/bills", billsRouter);
+app.use('/photos', photosRouter)
 
 //mongoose configuration
 mongoose
