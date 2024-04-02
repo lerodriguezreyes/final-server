@@ -3,6 +3,7 @@ var router = express.Router();
 var axios = require("axios");
 const Bill = require("../models/Bill");
 
+
 // retrieve all bills
 router.get("/", (req, res, next) => {
   Bill.find()
@@ -17,7 +18,7 @@ router.get("/", (req, res, next) => {
 });
 
 router.get("/details/:billId", (req, res, next) => {
-  Bill.findOne()
+  Bill.findById(req.params.billId)
     .then((foundBill) => {
       console.log("Retrieved sepecified bill by ID ====>", foundBill);
       res.json(foundBill);
@@ -27,6 +28,25 @@ router.get("/details/:billId", (req, res, next) => {
       res.json({ errorMessage: "Error retrieving specified bill", err });
     });
 });
+
+router.get('/conversation/:billId', (req, res, next) => {
+
+  Bill.findById(req.params.billId)
+    .populate({path: 'comments', 
+      populate: { path: 'owner'},
+      populate: { path: 'replies'},
+      populate: { path: 'author'}
+    })
+    .then((populated) => {
+      console.log("Retrieved sepecified bill by ID ====>", foundBill);
+      res.json(populated)
+    })
+    .catch((err) => {
+      console.log("Error retrieving specified bill", err);
+      res.json({ errorMessage: "Error retrieving specified bill", err });
+    });
+
+})
 
 router.post("/new", async (req, res, next) => {
   try {
@@ -84,6 +104,7 @@ router.post("/new", async (req, res, next) => {
             finalIndex = arr.length - 1;
             return i == finalIndex;
           })[0]?.formats[1].url || "",
+        comments:[]
       });
 
       res.status(201).json({ bill: newBill });
