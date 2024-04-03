@@ -20,6 +20,26 @@ router.get("/", (req, res, next) => {
     });
 });
 
+// get comment with its replies
+router.get('/conversation/:commentId', (req, res, next) => {
+
+  Comment.findById(req.params.commentId)
+    .populate({
+      populate: { path: 'replies'},
+      populate: { path: 'owner'}
+    })
+    .then((populated) => {
+      console.log("Retrieved sepecified parent comment by ID ====>",populated);
+      res.json(populated)
+    })
+    .catch((err) => {
+      console.log("Error retrieving parent comment and children replies", err);
+      res.json({ errorMessage: "Error retrieving parent comment", err });
+    });
+
+})
+
+
 /* new comment */
 router.post("/new", isAuthenticated, (req, res, next) => {
   const { comment, upVotes, downVotes, bill: billId } = req.body;
@@ -68,21 +88,27 @@ router.delete(
   "/delete/:commentId",
   isAuthenticated,
   isCommentOwner,
-  (req, res, next) => {
-    Bill.updateOne(
-      req.params.commentId,
-      { $pull: { comments: req.params.commentId } },
-      { new: true }
-    );
-    Comment.findByIdAndDelete(req.params.commentId)
-      .then((deletedComment) => {
-        console.log("Deleted ===>", deletedComment);
-        res.json(deletedComment);
-      })
-      .catch((err) => {
-        console.log("Error deleting comment ====>", err);
-        res.status(502).json(err);
-      });
+  async (req, res, next) => {
+
+    try {
+
+      let thisComment = await Comment.findByIdAndDelete(req.params.commentId)
+
+      let thisBill = await Bill.findById(thisComment.bill)
+
+      let lessComments = thisBill.comments.filter((comment) => comment._id.toString() != thisComment._id.toString())
+
+      thisBill.comments = lessComments
+
+      let updatedBill = await thisBill.save()
+
+      res.json(updatedBill)
+
+    } catch(err) {
+      console.log(err)
+      res.json(err)
+    }
+
   }
 );
 
