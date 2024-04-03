@@ -41,26 +41,50 @@ router.get('/conversation/:commentId', (req, res, next) => {
 
 
 /* new comment */
+// router.post("/new", isAuthenticated, (req, res, next) => {
+//   const { comment, upVotes, downVotes, bill: billId } = req.body;
+
+//   Comment.create({ comment, owner: req.user._id, bill: billId })
+//   .then((createdComment) => {
+//       console.log("Created a new comment ====>", createdComment);
+//       return Bill.findByIdAndUpdate(
+//         createdComment.bill,
+//         {
+//           $push: { comments: createdComment._id },
+//         },
+//         { new: true }
+//       );
+//     })
+//     .then((response) => res.json(response))
+//     .catch((err) => {
+//       console.log("Error while creating comment", err);
+//       res.status(500).json({ message: "Error while creating comment" });
+//     });
+// });
+
 router.post("/new", isAuthenticated, (req, res, next) => {
   const { comment, upVotes, downVotes, bill: billId } = req.body;
-
+  
   Comment.create({ comment, owner: req.user._id, bill: billId })
-    .then((createdComment) => {
-      console.log("Created a new comment ====>", createdComment);
-      return Bill.findByIdAndUpdate(
-        createdComment.bill,
-        {
-          $push: { comments: createdComment._id },
-        },
-        { new: true }
-      );
+    .then(createdComment => {
+      return Comment.findById(createdComment._id)
+      .populate({path: 'comment', populate: { path: 'owner'}}) 
+        .then(populatedComment => {
+          return Bill.findByIdAndUpdate(
+            populatedComment.bill,
+            { $push: { comments: populatedComment._id } },
+            { new: true }
+          ).then(bill => {
+            res.json(populatedComment);
+          });
+        });
     })
-    .then((response) => res.json(response))
-    .catch((err) => {
+    .catch(err => {
       console.log("Error while creating comment", err);
       res.status(500).json({ message: "Error while creating comment" });
     });
 });
+
 
 // update commment by id
 router.post(
