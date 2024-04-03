@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 var axios = require("axios");
 const Bill = require("../models/Bill");
-
+const Comment = require('../models/Comment')
 
 // retrieve all bills
 router.get("/", (req, res, next) => {
@@ -17,6 +17,7 @@ router.get("/", (req, res, next) => {
     });
 });
 
+// get bill by id
 router.get("/details/:billId", (req, res, next) => {
   Bill.findById(req.params.billId)
     .then((foundBill) => {
@@ -29,13 +30,12 @@ router.get("/details/:billId", (req, res, next) => {
     });
 });
 
+// get bill by id with comments
 router.get('/conversation/:billId', (req, res, next) => {
 
   Bill.findById(req.params.billId)
     .populate({path: 'comments', 
-      populate: { path: 'owner'},
-      // populate: { path: 'replies'},
-      // populate: { path: 'owner'}
+      populate: { path: 'owner'}
     })
     .then((populated) => {
       console.log("Retrieved sepecified bill by ID ====>",populated);
@@ -48,6 +48,7 @@ router.get('/conversation/:billId', (req, res, next) => {
 
 })
 
+// post new bill
 router.post("/new", async (req, res, next) => {
   try {
     const { title, congress, billType, billNumber } = req.body;
@@ -117,6 +118,7 @@ router.post("/new", async (req, res, next) => {
   }
 });
 
+// update bill
 router.post("/update/:billId", (req, res, next) => {
   const { title } = req.body;
 
@@ -147,16 +149,29 @@ router.post("/update/:billId", (req, res, next) => {
   });
 });
 
+
 router.get("/delete/:billId", (req, res, next) => {
   Bill.findByIdAndDelete(req.params.billId)
     .then((deletedBill) => {
       console.log("Deleted ===>", deletedBill);
-      res.json(deletedBill);
-    })
-    .catch((err) => {
-      console.log("Error deleting bill ====>", err);
-      res.status(502).json(err);
-    });
+      let AsociatedComments = [...deletedBill.comments];
+      let commentsToDelete = AsociatedComments.map((comment) => {
+        return Comment.findByIdAndDelete(comment);
+      });
+      Promise.allSettled(commentsToDelete)
+      .then((deletedComments) => {
+        console.log("Deleted Tasks ==>");
+        res.json({ deletedBill, deletedComments });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.json(err);
+      });
+  })
+  .catch((err) => {
+    console.log(err);
+    res.json(err);
+  });
 });
 
 module.exports = router;
