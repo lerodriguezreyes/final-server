@@ -10,7 +10,7 @@ const commentSchema = new Schema(
       type: Schema.Types.ObjectId, ref: "user",
     }],
     downVotes:[ {
-      type: Number,
+      type: Schema.Types.ObjectId, ref: "user",
     }],
     bill: { type: Schema.Types.ObjectId, ref: "Bill" },
     owner: { type: Schema.Types.ObjectId, ref: "User" },
