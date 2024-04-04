@@ -10,7 +10,7 @@ var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth'); 
 var commentsRouter = require('./routes/comments');
 var billsRouter = require('./routes/bills');
-var photosRouter = require('../server/routes/photos')
+var photosRouter = require('./routes/photos');
 
 var app = express();
 
