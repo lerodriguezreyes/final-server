@@ -20,71 +20,51 @@ router.get("/", (req, res, next) => {
     });
 });
 
-// get comment with its replies
-router.get('/conversation/:commentId', (req, res, next) => {
-
+// get a comment
+router.get("details/:commentId", (req, res, next) => {
   Comment.findById(req.params.commentId)
     .populate({
-      populate: { path: 'replies'},
-      populate: { path: 'owner'}
+      populate: { path: "owner" },
     })
     .then((populated) => {
-      console.log("Retrieved sepecified parent comment by ID ====>",populated);
-      res.json(populated)
+      console.log("Retrieved sepecified parent comment by ID ====>", populated);
+      res.json(populated);
     })
     .catch((err) => {
       console.log("Error retrieving parent comment and children replies", err);
       res.json({ errorMessage: "Error retrieving parent comment", err });
     });
-
-})
-
-
-/* new comment */
-// router.post("/new", isAuthenticated, (req, res, next) => {
-//   const { comment, upVotes, downVotes, bill: billId } = req.body;
-
-//   Comment.create({ comment, owner: req.user._id, bill: billId })
-//   .then((createdComment) => {
-//       console.log("Created a new comment ====>", createdComment);
-//       return Bill.findByIdAndUpdate(
-//         createdComment.bill,
-//         {
-//           $push: { comments: createdComment._id },
-//         },
-//         { new: true }
-//       );
-//     })
-//     .then((response) => res.json(response))
-//     .catch((err) => {
-//       console.log("Error while creating comment", err);
-//       res.status(500).json({ message: "Error while creating comment" });
-//     });
-// });
+});
 
 router.post("/new", isAuthenticated, (req, res, next) => {
   const { comment, upVotes, downVotes, bill: billId } = req.body;
-  
+
   Comment.create({ comment, owner: req.user._id, bill: billId })
-    .then(createdComment => {
+    .then((createdComment) => {
       return Comment.findById(createdComment._id)
-      .populate({path: 'comment', populate: { path: 'owner'}}) 
-        .then(populatedComment => {
+        .populate({ path: "comment", populate: { path: "owner" } })
+        .then((populatedComment) => {
           return Bill.findByIdAndUpdate(
             populatedComment.bill,
             { $push: { comments: populatedComment._id } },
             { new: true }
-          ).then(bill => {
-            res.json(populatedComment);
+          ).then((bill) => {
+            return bill
+              .populate({
+                path: "comments",
+                populate: {
+                  path: "owner",
+                },
+              })
+              .then((populated) => res.json(populated));
           });
         });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Error while creating comment", err);
       res.status(500).json({ message: "Error while creating comment" });
     });
 });
-
 
 // update commment by id
 router.post(
@@ -113,26 +93,24 @@ router.delete(
   isAuthenticated,
   isCommentOwner,
   async (req, res, next) => {
-
     try {
-
-      let thisComment = await Comment.findByIdAndDelete(req.params.commentId)
-
-      let thisBill = await Bill.findById(thisComment.bill)
-
-      let lessComments = thisBill.comments.filter((comment) => comment._id.toString() != thisComment._id.toString())
-
-      thisBill.comments = lessComments
-
-      let updatedBill = await thisBill.save()
-
-      res.json(updatedBill)
-
-    } catch(err) {
-      console.log(err)
-      res.json(err)
+      let thisComment = await Comment.findByIdAndDelete(req.params.commentId);
+      let thisBill = await Bill.findById(thisComment.bill);
+      let lessComments = thisBill.comments.filter(
+        (comment) => comment._id.toString() != thisComment._id.toString()
+      );
+      thisBill.comments = lessComments;
+      let updatedBill = await thisBill.save();
+      let populated = await thisBill.populate({
+        path: "comments",
+        populate: { path: "owner" },
+      });
+      console.log(populated);
+      res.json(populated);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
     }
-
   }
 );
 

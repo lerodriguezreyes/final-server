@@ -6,15 +6,14 @@ const commentSchema = new Schema(
       type: String,
       required: true,
     },
-    upVotes: {
+    upVotes: [{
+      type: Schema.Types.ObjectId, ref: "user",
+    }],
+    downVotes:[ {
       type: Number,
-    },
-    downVotes: {
-      type: Number,
-    },
+    }],
     bill: { type: Schema.Types.ObjectId, ref: "Bill" },
     owner: { type: Schema.Types.ObjectId, ref: "User" },
-    replies: [{ type: Schema.Types.ObjectId, ref: "Reply"}]
   },
   {
     timestamps: true,

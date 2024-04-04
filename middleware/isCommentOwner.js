@@ -6,7 +6,7 @@ const isCommentOwner = (req, res, next) => {
             if (foundComment.owner.toString() === req.user._id) {
                 next()
             } else {
-                res.status(402).json({message: "Not authorized."})
+                res.status(401).json({message: "Not authorized."})
             }
         })
         .catch((err) => {

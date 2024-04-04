@@ -11,7 +11,6 @@ var authRouter = require('./routes/auth');
 var commentsRouter = require('./routes/comments');
 var billsRouter = require('./routes/bills');
 var photosRouter = require('../server/routes/photos')
-var repliesRouter = require('../server/routes/replies')
 
 var app = express();
 
@@ -37,12 +36,11 @@ app.use('/auth', authRouter);
 app.use('/comments', commentsRouter);
 app.use("/bills", billsRouter);
 app.use('/photos', photosRouter);
-app.use('/replies', repliesRouter);
 
 //mongoose configuration
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(x => console.log(`Connected to Database: "${x.connections[0].name}"`))
-  .catch(err => console.error("Error connecting to MongoDB", err));
+  .then(x => console.log(`Connected to 🫡  Database: "${x.connections[0].name}"`))
+  .catch(err => console.error("Error connecting to MongoDB 😣", err));
 
 module.exports = app;

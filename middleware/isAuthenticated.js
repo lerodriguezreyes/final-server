@@ -4,7 +4,7 @@ const isAuthenticated = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token || token === "null") {
-    return res.status(400).json({ message: "Token not found" });
+    return res.status(401).json({ message: "Token not found" });
   }
  
   try {
